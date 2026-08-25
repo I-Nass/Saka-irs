@@ -1,0 +1,42 @@
+<section class="panel">
+    <div class="page-head">
+        <div>
+            <h2>Library</h2>
+            <p class="muted">Everything indexed for visual search. Retention policy applies.</p>
+        </div>
+        <a class="btn btn-secondary" href="/#tool">+ Index an image</a>
+    </div>
+
+    <div class="stats-bar" id="library-stats" aria-live="polite"></div>
+
+    <div class="lib-grid" id="library-grid"></div>
+
+    <p id="library-empty" class="empty-note hidden">Nothing indexed yet — open <a href="/#tool">Search</a> and use “Add to Library”.</p>
+    <p id="library-error" class="status error hidden" role="alert"></p>
+
+    <div class="load-more-row">
+        <button id="library-more" class="btn btn-secondary hidden" type="button">Load more</button>
+    </div>
+</section>
+
+<template id="lib-card-template">
+    <figure class="lib-card">
+        <button class="lib-thumb-btn" type="button" data-role="details" title="View details">
+            <img class="lib-thumb" alt="">
+        </button>
+        <figcaption class="lib-body">
+            <p class="lib-name"></p>
+            <p class="lib-meta"></p>
+        </figcaption>
+        <div class="lib-actions">
+            <button type="button" class="btn-icon" data-role="details" title="Details">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.5 V16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="currentColor"/></svg>
+                <span class="sr-only">Details</span>
+            </button>
+            <button type="button" class="btn-icon danger" data-role="delete" title="Delete">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7 h15 M9.5 7 V5.2 A1.2 1.2 0 0 1 10.7 4 h2.6 A1.2 1.2 0 0 1 14.5 5.2 V7 M6.5 7 l1 12 h9 l1 -12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="sr-only">Delete</span>
+            </button>
+        </div>
+    </figure>
+</template>

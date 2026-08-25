@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Saka-irs — image-first visual search, resemblance and discovery across your own indexed library. Local, private, honest.">
+    <meta name="theme-color" content="#0e1116">
+    <title><%= typeof title !== 'undefined' ? title : 'Saka-irs' %></title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="/" aria-label="Saka-irs home">
+                <svg class="brand-logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                    <rect x="3" y="3" width="58" height="58" rx="14" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width="2"/>
+                    <path d="M32 9 L55 32 L32 55 L9 32 Z" fill="none" stroke="#4da3ff" stroke-width="3.5" stroke-linejoin="round"/>
+                    <circle cx="32" cy="32" r="9.5" fill="none" stroke="#9a7bff" stroke-width="3.5"/>
+                    <circle cx="32" cy="32" r="2.6" fill="#e6ebf2"/>
+                </svg>
+                <span class="brand-text">
+                    <h1>Saka-irs</h1>
+                    <p class="tagline">Image Recognition Software</p>
+                </span>
+            </a>
+            <nav class="site-nav" aria-label="Primary">
+                <a href="/#tool">Search</a>
+                <a href="/library">Library</a>
+                <a href="/history">History</a>
+                <a href="/#how">How it works</a>
+                <a href="/#questions">What it answers</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+<%- body %>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-roadmap" aria-label="Roadmap">
+            <span class="rm-done">Phase 1 · Local matching — live</span>
+            <span>1.5 · External discovery</span>
+            <span>2 · Feature match</span>
+            <span>3 · Semantic search</span>
+            <span>4 · Recognition</span>
+        </div>
+        <p class="footer-note">MVP · evidence, not certainty · runs entirely on your machine</p>
+    </footer>
+
+    <script src="/js/app.js" defer></script>
+    <script src="/js/upload.js" defer></script>
+    <script src="/js/results.js" defer></script>
+    <script src="/js/modal.js" defer></script>
+    <script src="/js/library.js" defer></script>
+    <script src="/js/history.js" defer></script>
+</body>
+</html>

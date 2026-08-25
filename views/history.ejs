@@ -1,0 +1,30 @@
+<section class="panel">
+    <div class="page-head">
+        <div>
+            <h2>Search history</h2>
+            <p class="muted">Most recent 20 searches. Query thumbnails are kept for 24 hours.</p>
+        </div>
+        <a class="btn btn-secondary" href="/#tool">New search</a>
+    </div>
+
+    <ol class="timeline" id="history-list"></ol>
+
+    <p id="history-empty" class="empty-note hidden">No searches yet — run one from the <a href="/#tool">search page</a>.</p>
+    <p id="history-error" class="status error hidden" role="alert"></p>
+</section>
+
+<template id="history-item-template">
+    <li class="tl-item">
+        <div class="tl-thumb-wrap">
+            <img class="tl-thumb" alt="Query thumbnail">
+        </div>
+        <div class="tl-body">
+            <p class="tl-top">
+                <span class="tl-date"></span>
+                <span class="pill tl-status"></span>
+            </p>
+            <p class="tl-meta"></p>
+            <div class="provider-strip tl-providers"></div>
+        </div>
+    </li>
+</template>

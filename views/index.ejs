@@ -1,0 +1,133 @@
+<section class="hero" id="top">
+    <p class="eyebrow">Image-first visual search · MVP</p>
+    <h2 class="hero-title">Search with an image,<br><span class="grad">not words.</span></h2>
+    <p class="hero-sub">
+        Saka-irs fingerprints every image you add, then finds exact duplicates,
+        near duplicates and perceptually similar images across your own library —
+        locally, privately, and with every result honestly labeled.
+    </p>
+    <div class="hero-motif" aria-hidden="true">
+        <span class="chip">IMAGE</span>
+        <span class="motif-arrow">→</span>
+        <span class="chip chip-accent">SEARCH</span>
+        <span class="motif-arrow">→</span>
+        <span class="chip chip-alt">VISUAL RESULTS</span>
+    </div>
+    <div class="hero-actions">
+        <a class="btn btn-primary" href="#tool">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Start searching
+        </a>
+        <a class="btn btn-secondary" href="#questions">See what it answers</a>
+    </div>
+</section>
+
+<section class="panel" id="tool">
+    <h2>Search or index an image</h2>
+    <p class="muted">The image is the primary input. Add optional context hints below — hints drive external corpus providers, never replace visual search.</p>
+
+    <form id="saka-form">
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose an image">
+            <img id="preview" class="preview hidden" alt="Selected image preview">
+            <div id="dropzone-hint" class="dz-hint">
+                <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="9.5" r="1.8" fill="currentColor"/><path d="M4.5 17.5 L10 12 L14 15.5 L17 13 L19.5 15.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <p>Click or drop an image here</p>
+                <p class="muted">JPEG · PNG · WebP · GIF · AVIF · TIFF — max <span id="max-size-label">15</span>MB</p>
+            </div>
+            <input type="file" id="image-input" name="image" accept="image/*" hidden>
+        </div>
+
+        <fieldset class="hints">
+            <legend>Contextual hints (optional)</legend>
+            <div class="hint-grid">
+                <label>Name <input type="text" name="name" maxlength="120"></label>
+                <label>Location <input type="text" name="location" maxlength="120"></label>
+                <label>Username <input type="text" name="username" maxlength="120"></label>
+                <label>Organization <input type="text" name="organization" maxlength="120"></label>
+                <label>Keyword <input type="text" name="keyword" maxlength="120"></label>
+            </div>
+        </fieldset>
+
+        <div class="actions">
+            <button type="submit" data-action="search" class="btn btn-primary" disabled>Saka — Search</button>
+            <button type="submit" data-action="index" class="btn btn-secondary" disabled>Add to Library</button>
+        </div>
+
+        <p id="form-status" class="status hidden" role="status"></p>
+    </form>
+</section>
+
+<section class="panel hidden" id="results-panel">
+    <h2>Results</h2>
+    <div id="provider-strip" class="provider-strip"></div>
+    <div id="results-container"></div>
+</section>
+
+<template id="result-card-template">
+    <article class="result-card">
+        <a class="thumb-link"><img class="thumb" alt="Result thumbnail"></a>
+        <div class="result-body">
+            <p class="result-title"></p>
+            <div class="badges">
+                <span class="badge matchtype"></span>
+                <span class="badge confidence"></span>
+            </div>
+            <p class="result-meta"></p>
+        </div>
+    </article>
+</template>
+
+<section class="info-section" id="how">
+    <h3 class="section-title">How it works</h3>
+    <div class="cards-3">
+        <article class="card">
+            <span class="step-num">1</span>
+            <svg class="icon card-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 7 V5.5 A1.5 1.5 0 0 1 9.5 4 h5 A1.5 1.5 0 0 1 16 5.5 V7" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 13 h18" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2.5 2.5"/></svg>
+            <h4>Add to Library</h4>
+            <p>Every image is validated, normalized — orientation, alpha, grayscale, fixed resize — then fingerprinted into 64-bit pHash, dHash and aHash signatures.</p>
+        </article>
+        <article class="card">
+            <span class="step-num">2</span>
+            <svg class="icon card-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M16.5 16.5 L21 21" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8.5 11 a2.5 2.5 0 0 1 5 0" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+            <h4>Saka — Search</h4>
+            <p>Your query gets fingerprinted the exact same way, then Hamming distance ranks every library candidate in milliseconds — fully offline.</p>
+        </article>
+        <article class="card">
+            <span class="step-num">3</span>
+            <svg class="icon card-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 L14.6 9 L21 9.6 L16.2 13.8 L17.7 20 L12 16.6 L6.3 20 L7.8 13.8 L3 9.6 L9.4 9 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <h4>Evidence, classified</h4>
+            <p>Matches are labeled exact / near duplicate / visually similar with Strong–Weak confidence buckets — never a fake cross-provider percentage.</p>
+        </article>
+    </div>
+</section>
+
+<section class="info-section" id="questions">
+    <h3 class="section-title">The five questions Saka-irs answers</h3>
+    <div class="cards-q">
+        <article class="q-card">
+            <div class="q-head"><span class="q-num">Q1</span><span class="phase-badge live">Live</span></div>
+            <h4>Have I seen this image before?</h4>
+            <p>Local perceptual matching across everything you have indexed.</p>
+        </article>
+        <article class="q-card">
+            <div class="q-head"><span class="q-num">Q2</span><span class="phase-badge live">Live</span></div>
+            <h4>Is there a modified version of it?</h4>
+            <p>pHash / dHash / aHash catch resizes, recompression and edits.</p>
+        </article>
+        <article class="q-card future">
+            <div class="q-head"><span class="q-num">Q3</span><span class="phase-badge">Phase 2</span></div>
+            <h4>Does another image share its features?</h4>
+            <p>Feature matching for crops and partial images — OpenCV ORB/SIFT.</p>
+        </article>
+        <article class="q-card future">
+            <div class="q-head"><span class="q-num">Q4</span><span class="phase-badge">Phase 3</span></div>
+            <h4>Which images visually resemble it?</h4>
+            <p>Semantic similarity via CLIP embeddings and vector search.</p>
+        </article>
+        <article class="q-card future">
+            <div class="q-head"><span class="q-num">Q5</span><span class="phase-badge">Optional</span></div>
+            <h4>Where does it exist externally?</h4>
+            <p>ToS-compliant reverse-image discovery — never enabled by default.</p>
+        </article>
+    </div>
+</section>
