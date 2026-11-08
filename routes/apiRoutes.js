@@ -25,7 +25,11 @@ router.get('/images', requireDb, imageController.listImages);
 router.post('/images', requireDb, upload, validateImageUpload, imageController.indexImage);
 router.get('/images/:id', requireDb, imageController.getImage);
 router.get('/images/:id/thumbnail', requireDb, imageController.getThumbnail);
+router.get('/images/:id/ela', requireDb, imageController.getForensicELA);
 router.delete('/images/:id', requireDb, imageController.deleteImage);
+
+/* Forensics */
+router.post('/forensics/ela', upload, validateImageUpload, imageController.computeUploadELA);
 
 /* Search flow */
 router.post('/search', requireDb, ...searchController.search);

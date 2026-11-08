@@ -37,7 +37,7 @@ function withTimeout(promise, ms, providerName) {
 async function search(input) {
     const startedAt = Date.now();
     const providers = enabledProviders();
-    const externalTimeoutMs = parseInt(process.env.EXTERNAL_TIMEOUT_MS || '8000', 10);
+    const externalTimeoutMs = parseInt(process.env.EXTERNAL_TIMEOUT_MS || '10000', 10);
 
     // Local providers are in-process and fast; externals get the hard cap.
     function budgetFor(provider) {

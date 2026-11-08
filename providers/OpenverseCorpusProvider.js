@@ -12,7 +12,7 @@ try {
 
 const https = require('https');
 
-function fetchOpenverse(query, timeoutMs = 7000) {
+function fetchOpenverse(query, timeoutMs = 9000) {
     return new Promise((resolve, reject) => {
         const url = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query)}&page_size=12`;
         const req = https.get(

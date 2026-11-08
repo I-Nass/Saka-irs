@@ -3,10 +3,12 @@
  */
 
 const path = require('path');
+const fs = require('fs/promises');
 
 const StorageService = require('../services/StorageService');
 const ImageService = require('../services/ImageService');
 const { sanitizeHints } = require('../utils/sanitize');
+const { generateELA } = require('../utils/forensics');
 
 /** POST /api/images — add an image to the indexed library. */
 async function indexImage(req, res, next) {
@@ -68,4 +70,45 @@ async function listImages(req, res, next) {
     }
 }
 
-module.exports = { indexImage, getImage, getThumbnail, deleteImage, listImages };
+/** GET /api/images/:id/ela — generate & serve Error Level Analysis for a stored image. */
+async function getForensicELA(req, res, next) {
+    try {
+        const doc = await ImageService.getImageDoc(req.params.id);
+        const targetPath = doc.storagePath || doc.thumbnailPath;
+        if (!targetPath) {
+            return res.status(404).json({ error: { status: 404, message: 'Image file not found.' } });
+        }
+        const buffer = await fs.readFile(targetPath);
+        const quality = Math.min(100, Math.max(50, parseInt(req.query.quality, 10) || 90));
+        const scale = Math.min(50, Math.max(1, parseInt(req.query.scale, 10) || 20));
+        const elaBuffer = await generateELA(buffer, { quality, scale });
+        res.type('image/webp').send(elaBuffer);
+    } catch (err) {
+        return next(err);
+    }
+}
+
+/** POST /api/forensics/ela — direct ELA generation from upload. */
+async function computeUploadELA(req, res, next) {
+    try {
+        if (!req.upload || !req.upload.buffer) {
+            return res.status(400).json({ error: { status: 400, message: 'No image uploaded.' } });
+        }
+        const quality = Math.min(100, Math.max(50, parseInt(req.body.quality, 10) || 90));
+        const scale = Math.min(50, Math.max(1, parseInt(req.body.scale, 10) || 20));
+        const elaBuffer = await generateELA(req.upload.buffer, { quality, scale });
+        res.type('image/webp').send(elaBuffer);
+    } catch (err) {
+        return next(err);
+    }
+}
+
+module.exports = {
+    indexImage,
+    getImage,
+    getThumbnail,
+    deleteImage,
+    listImages,
+    getForensicELA,
+    computeUploadELA
+};

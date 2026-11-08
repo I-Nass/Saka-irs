@@ -65,6 +65,8 @@
         <div class="actions">
             <button type="submit" data-action="search" class="btn btn-primary" disabled>Saka — Search</button>
             <button type="submit" data-action="index" class="btn btn-secondary" disabled>Add to Library</button>
+            <button type="button" id="btn-inspect-forensics" class="btn btn-secondary" disabled>Inspect Forensics
+                (ELA)</button>
         </div>
 
         <p id="form-status" class="status hidden" role="status"></p>
@@ -75,6 +77,86 @@
     <h2>Results</h2>
     <div id="provider-strip" class="provider-strip"></div>
     <div id="results-container"></div>
+</section>
+
+<section class="panel hidden" id="forensics-panel">
+    <div class="panel-header-row">
+        <div>
+            <h2>Digital Forensics · Error Level Analysis (ELA)</h2>
+            <p class="muted">Recreates the FotoForensics methodology 100% offline. Highlights JPEG compression variance
+                to expose image splicing, cloned regions, and digital tampering.</p>
+        </div>
+        <span class="badge badge-accent">Offline Forensic Engine</span>
+    </div>
+
+    <div class="forensics-workbench">
+        <div class="forensics-viewer-box">
+            <div class="comparison-container" id="ela-comparison">
+                <img id="ela-base-img" class="comp-img comp-base" alt="Original Image">
+                <img id="ela-heat-img" class="comp-img comp-overlay" alt="ELA Heat Map">
+                <div class="comparison-divider" id="comp-divider">
+                    <div class="divider-handle">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M8 5 L3 12 L8 19 M16 5 L21 12 L16 19" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="comp-label label-left">Original</div>
+                <div class="comp-label label-right">ELA Heat Map</div>
+            </div>
+
+            <div class="comparison-toolbar">
+                <div class="toolbar-group">
+                    <label>Quality:
+                        <select id="ela-quality-select">
+                            <option value="90" selected>90% (Standard)</option>
+                            <option value="95">95% (Fine Detail)</option>
+                            <option value="85">85% (High Compression)</option>
+                        </select>
+                    </label>
+                    <label>Multiplier:
+                        <select id="ela-scale-select">
+                            <option value="15">15×</option>
+                            <option value="20" selected>20× (Recommended)</option>
+                            <option value="30">30× (High Contrast)</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="toolbar-group">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-view">Show Full ELA</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-recompute-ela">Recompute</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="forensics-guide-box">
+            <h3>How to Read Error Level Analysis</h3>
+            <div class="guide-item">
+                <span class="guide-dot dot-green"></span>
+                <div>
+                    <strong>Uniform Noise Distribution</strong>
+                    <p class="muted">Consistent noise grain across identical textures (sky, skin, backgrounds) indicates
+                        an authentic, single-source camera exposure.</p>
+                </div>
+            </div>
+            <div class="guide-item">
+                <span class="guide-dot dot-yellow"></span>
+                <div>
+                    <strong>High-Contrast Edge Halos</strong>
+                    <p class="muted">Bright lines along sharp boundaries (horizons, roofs, high-contrast text) are
+                        standard mathematical artifacts of JPEG DCT transformations.</p>
+                </div>
+            </div>
+            <div class="guide-item">
+                <span class="guide-dot dot-red"></span>
+                <div>
+                    <strong>Isolated Glowing Patches / Splices</strong>
+                    <p class="muted">If an inserted object, person, or pasted text glows noticeably brighter than
+                        surrounding flat areas, it was likely modified or pasted from a different source.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 <template id="result-card-template">
@@ -95,6 +177,7 @@
             <p class="result-meta"></p>
             <div class="card-links">
                 <button type="button" class="btn-card btn-details hidden">Details</button>
+                <button type="button" class="btn-card btn-forensics hidden">Forensics</button>
                 <a class="btn-card btn-ext-link hidden" target="_blank" rel="noopener noreferrer">Visit Source ↗</a>
             </div>
         </div>

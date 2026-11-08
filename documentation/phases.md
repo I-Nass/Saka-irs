@@ -10,14 +10,14 @@
 | Track | Phase | Name | Status |
 |-------|-------|------|--------|
 | Backend | B1 | Local visual history matching | ✅ **Done** |
-| Backend | B1.5 | External reverse-image discovery | ⏸ Deferred (API/ToS) |
+| Backend | B1.5 | External discovery (Openverse, Wikimedia, Vision template) | ✅ **Done** |
 | Backend | B2 | Feature matching (crops/partial) | 🔜 Planned |
 | Backend | B3 | Semantic visual search (CLIP) | 🔜 Planned |
 | Backend | B4 | Recognition | 🧭 Long-term |
-| Backend | BI | Infrastructure items (benchmarks, auth, jobs, cloud storage) | 🔁 Ongoing |
+| Backend | BI-1 | Benchmark calibration harness (`npm run benchmark`) | ✅ **Done** |
 | Frontend | F1 | Identity & landing | ✅ **Done** |
 | Frontend | F2 | Surfaces: Library, History, Metadata inspector | ✅ **Done** |
-| Frontend | F3 | Results UX & input delight | 🔜 Next |
+| Frontend | F3 | Results UX, distance meters, Ctrl+V, Forensic ELA workbench | ✅ **Done** |
 | Frontend | F4 | Delight & polish pass | 🧭 Later |
 
 ---

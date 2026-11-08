@@ -82,13 +82,20 @@
         }
         card.querySelector('.result-meta').textContent = meta.join(' · ');
 
-        // Action links: Details for local, Visit Source for external
+        // Action links: Details and Forensics for local, Visit Source for external
         const btnDetails = card.querySelector('.btn-details');
+        const btnForensics = card.querySelector('.btn-forensics');
         const btnExt = card.querySelector('.btn-ext-link');
 
-        if (result.sourceType === 'local' && result.id && btnDetails) {
-            btnDetails.classList.remove('hidden');
-            btnDetails.setAttribute('data-meta-id', result.id);
+        if (result.sourceType === 'local' && result.id) {
+            if (btnDetails) {
+                btnDetails.classList.remove('hidden');
+                btnDetails.setAttribute('data-meta-id', result.id);
+            }
+            if (btnForensics) {
+                btnForensics.classList.remove('hidden');
+                btnForensics.setAttribute('data-forensics-id', result.id);
+            }
         } else if (result.sourceUrl && btnExt) {
             btnExt.classList.remove('hidden');
             btnExt.href = result.sourceUrl;
@@ -121,8 +128,21 @@
             if (items.length === 0) {
                 const empty = document.createElement('p');
                 empty.className = 'empty-note';
-                if (key === 'discovery' && payload.providers && payload.providers['external-corpus'] && payload.providers['external-corpus'].status === 'skipped') {
-                    empty.textContent = 'External archive search was skipped because no contextual hints were provided. Enter a keyword (e.g. "safari") or location in the hints box to search public archives.';
+                if (key === 'discovery') {
+                    const failed = [];
+                    Object.keys(payload.providers || {}).forEach(function (pName) {
+                        const p = payload.providers[pName];
+                        if (p && p.status === 'failed') {
+                            failed.push(pName + ' (' + (p.error || 'unavailable') + ')');
+                        }
+                    });
+                    if (failed.length > 0) {
+                        empty.textContent = 'External providers were temporarily unavailable: ' + failed.join(' · ') + '. Your local library results are unaffected.';
+                    } else if (payload.providers && payload.providers['external-corpus'] && payload.providers['external-corpus'].status === 'skipped') {
+                        empty.textContent = 'External archive search was skipped because no contextual hints were provided. Enter a keyword (e.g. "safari") or location in the hints box to search public archives.';
+                    } else {
+                        empty.textContent = 'No external archive matches found for this query.';
+                    }
                 } else if (key === 'duplicates') {
                     empty.textContent = 'No matching image found in your local library. Click "Add to Library" on the upload form to index it into your searchable database.';
                 } else {

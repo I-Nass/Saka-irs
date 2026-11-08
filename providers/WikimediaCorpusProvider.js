@@ -13,7 +13,7 @@ try {
 
 const https = require('https');
 
-function fetchWikimedia(query, limit = 10, timeoutMs = 7000) {
+function fetchWikimedia(query, limit = 10, timeoutMs = 9000) {
     return new Promise((resolve, reject) => {
         const url = `https://api.wikimedia.org/core/v1/commons/search/page?q=${encodeURIComponent(query)}&limit=${limit}`;
         const req = https.get(
@@ -29,6 +29,10 @@ function fetchWikimedia(query, limit = 10, timeoutMs = 7000) {
                 res.on('data', (c) => { data += c; });
                 res.on('end', () => {
                     try {
+                        if (res.statusCode === 429) {
+                            reject(new Error('Wikimedia rate-limited (HTTP 429). Please wait a moment before re-querying.'));
+                            return;
+                        }
                         if (res.statusCode >= 400) {
                             reject(new Error(`Wikimedia HTTP ${res.statusCode}`));
                             return;
