@@ -6,11 +6,13 @@
 
 const LocalHashProvider = require('./LocalHashProvider');
 const OpenverseCorpusProvider = require('./OpenverseCorpusProvider');
+const WikimediaCorpusProvider = require('./WikimediaCorpusProvider');
 const GoogleVisionProvider = require('./GoogleVisionProvider');
 
 const PROVIDERS = [
     LocalHashProvider,
     OpenverseCorpusProvider,
+    WikimediaCorpusProvider,
     GoogleVisionProvider
 ];
 

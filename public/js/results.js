@@ -62,13 +62,37 @@
 
         const meta = [];
         meta.push(result.provider + ' · ' + result.matchMethod.replace(/_/g, ' '));
+
+        const meterWrap = card.querySelector('.distance-meter');
         if (result.distance !== null && result.distance !== undefined) {
             meta.push('pHash distance: ' + result.distance);
+            if (meterWrap) {
+                meterWrap.classList.remove('hidden');
+                const fill = meterWrap.querySelector('.meter-fill');
+                const text = meterWrap.querySelector('.meter-text');
+                const pct = Math.max(0, Math.min(100, Math.round((1 - result.distance / 64) * 100)));
+                fill.style.width = pct + '%';
+                fill.className = 'meter-fill ' + (result.distance <= 6 ? 'strong' : result.distance <= 12 ? 'moderate' : 'weak');
+                text.textContent = result.distance + '/64 dist (' + pct + '% match)';
+            }
         }
+
         if (result.foundVia.length > 1) {
             meta.push('found via: ' + result.foundVia.join(' + '));
         }
         card.querySelector('.result-meta').textContent = meta.join(' · ');
+
+        // Action links: Details for local, Visit Source for external
+        const btnDetails = card.querySelector('.btn-details');
+        const btnExt = card.querySelector('.btn-ext-link');
+
+        if (result.sourceType === 'local' && result.id && btnDetails) {
+            btnDetails.classList.remove('hidden');
+            btnDetails.setAttribute('data-meta-id', result.id);
+        } else if (result.sourceUrl && btnExt) {
+            btnExt.classList.remove('hidden');
+            btnExt.href = result.sourceUrl;
+        }
     }
 
     Saka.renderResults = function (payload) {

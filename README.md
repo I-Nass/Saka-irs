@@ -152,6 +152,7 @@ All settings live in `.env` (see `.env.example`):
 | `MONGODB_URI` | `mongodb://127.0.0.1:27017/saka-irs` | Database connection |
 | `LOCAL_PROVIDER` | `true` | Enable local hash matching |
 | `EXTERNAL_CORPUS_PROVIDER` | `true` | Openverse CC/public domain corpus provider (Category A — Free) |
+| `WIKIMEDIA_PROVIDER` | `true` | Wikimedia Commons historical/encyclopedic media provider (Category A — Free) |
 | `EXTERNAL_REVERSE_PROVIDER` | `false` | Web reverse-image discovery (Category B — Google Vision / TinEye) |
 | `GOOGLE_VISION_API_KEY` | `""` | Optional API key for Google Cloud Vision `webDetection` |
 | `EXTERNAL_TIMEOUT_MS` | `8000` | Hard timeout per external call |
@@ -206,7 +207,8 @@ saka-irs/
 Saka-irs runs on a duck-typed provider architecture (`providers/`). Providers execute in parallel under a hard timeout (`Promise.allSettled`), ensuring external delays never crash your local library searches.
 
 ### Category A — 100% Free & Zero Key Required (Shipped & Active)
-- **Openverse Corpus Provider (`external-corpus`)**: Queries over 700 million openly licensed Creative Commons, museum, and cultural archive images using contextual hints (`keyword`, `location`, `name`). Skips automatically when no text hints are supplied.
+- **Openverse Corpus Provider (`external-corpus`)**: Queries over 700 million openly licensed Creative Commons, museum, and cultural archive images using contextual hints (`keyword`, `location`, `name`) or filename fallback.
+- **Wikimedia Commons Provider (`wikimedia-corpus`)**: Queries the official Wikimedia Foundation REST API across millions of historical, encyclopedic, news, and public domain media files. Ships active out of the box with zero API keys required.
 
 ### Category B — Generous Free Tiers (Requires Free Sign-up Key)
 - **Google Cloud Vision API (`google-vision`)**: Template included in `providers/GoogleVisionProvider.js`. Provides true reverse-image web detection (`pagesWithMatchingImages`, partial crops, full web matches). **1,000 free requests per month**. Enable by adding `GOOGLE_VISION_API_KEY` to `.env`.
@@ -214,8 +216,8 @@ Saka-irs runs on a duck-typed provider architecture (`providers/`). Providers ex
 - **Picarta.ai**: AI visual geolocation predicting city, country, and geographic coordinates from visual terrain, architecture, and flora.
 
 ### Category C — Self-Hosted / Local AI Sidecars (Zero Cloud Dependency)
+- **Forensic Error Level Analysis (ELA)**: Local compression variance detection (`utils/forensics.js`) using `sharp` to recreate FotoForensics 100% offline. Computes absolute difference against a uniform lossy baseline to highlight cloned, edited, or spliced areas.
 - **Local ONNX / Transformers CLIP Embeddings (Phase 3)**: CPU/GPU local vector embeddings for semantic concept matching without external network calls.
-- **Forensic Error Level Analysis (ELA)**: Local compression variance detection for digital image forgery and tampering analysis.
 
 ### OSINT Tradecraft & Reference Knowledge Base
 For investigative workflows, multi-engine reverse pivots, and forensic tradecraft, Saka-irs references and aligns with the curated community directory:
