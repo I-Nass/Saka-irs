@@ -14,14 +14,14 @@ function normalizeResult(raw) {
 
     const base = {
         id: raw.imageId || raw.id || null,
-        imageUrl: null,
+        imageUrl: raw.imageUrl || raw.thumbnailUrl || null,
         sourceUrl: raw.url || null,
         sourceType: raw.sourceType || 'local',
         provider: raw.provider,
         matchMethod: raw.matchMethod || 'unknown',
-        matchType: 'visually_similar',
-        confidence: 'weak',
-        distance: null,
+        matchType: raw.matchType || 'visually_similar',
+        confidence: raw.confidence || 'weak',
+        distance: raw.distance !== undefined ? raw.distance : null,
         title: raw.title || null,
         metadata: raw.metadata || {},
         foundVia: [],

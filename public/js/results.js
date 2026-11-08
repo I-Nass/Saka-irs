@@ -41,9 +41,12 @@
         const link = card.querySelector('.thumb-link');
         const img = card.querySelector('.thumb');
         img.alt = result.title || 'result';
-        link.href = result.imageUrl || '#';
+        link.href = result.sourceUrl || result.imageUrl || '#';
         if (link.href.endsWith('#')) {
             link.removeAttribute('href');
+        } else if (result.sourceType !== 'local') {
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
         }
         img.src = result.imageUrl || '';
 
@@ -94,7 +97,13 @@
             if (items.length === 0) {
                 const empty = document.createElement('p');
                 empty.className = 'empty-note';
-                empty.textContent = 'Nothing in this category.';
+                if (key === 'discovery' && payload.providers && payload.providers['external-corpus'] && payload.providers['external-corpus'].status === 'skipped') {
+                    empty.textContent = 'External archive search was skipped because no contextual hints were provided. Enter a keyword (e.g. "safari") or location in the hints box to search public archives.';
+                } else if (key === 'duplicates') {
+                    empty.textContent = 'No matching image found in your local library. Click "Add to Library" on the upload form to index it into your searchable database.';
+                } else {
+                    empty.textContent = 'Nothing in this category.';
+                }
                 section.appendChild(empty);
             } else {
                 const grid = document.createElement('div');

@@ -151,8 +151,9 @@ All settings live in `.env` (see `.env.example`):
 | `PORT` | `3000` | HTTP port |
 | `MONGODB_URI` | `mongodb://127.0.0.1:27017/saka-irs` | Database connection |
 | `LOCAL_PROVIDER` | `true` | Enable local hash matching |
-| `EXTERNAL_REVERSE_PROVIDER` | `false` | Reverse-image provider *(Phase 1.5)* |
-| `EXTERNAL_CORPUS_PROVIDER` | `false` | Corpus provider — hint-driven *(optional)* |
+| `EXTERNAL_CORPUS_PROVIDER` | `true` | Openverse CC/public domain corpus provider (Category A — Free) |
+| `EXTERNAL_REVERSE_PROVIDER` | `false` | Web reverse-image discovery (Category B — Google Vision / TinEye) |
+| `GOOGLE_VISION_API_KEY` | `""` | Optional API key for Google Cloud Vision `webDetection` |
 | `EXTERNAL_TIMEOUT_MS` | `8000` | Hard timeout per external call |
 | `NEAR_DUPLICATE_THRESHOLD` | `6` | pHash/dHash distance ≤ → near duplicate |
 | `VISUAL_MATCH_THRESHOLD` | `12` | Distance ≤ → visually similar candidate |
@@ -199,6 +200,27 @@ saka-irs/
 - **Phase 2** — feature matching for crops/partial images (OpenCV ORB/SIFT)
 - **Phase 3** — semantic visual search (CLIP embeddings + vector DB)
 - **Phase 4** — recognition, only when technically & legally justified
+
+## Search Providers & OSINT Extensibility
+
+Saka-irs runs on a duck-typed provider architecture (`providers/`). Providers execute in parallel under a hard timeout (`Promise.allSettled`), ensuring external delays never crash your local library searches.
+
+### Category A — 100% Free & Zero Key Required (Shipped & Active)
+- **Openverse Corpus Provider (`external-corpus`)**: Queries over 700 million openly licensed Creative Commons, museum, and cultural archive images using contextual hints (`keyword`, `location`, `name`). Skips automatically when no text hints are supplied.
+
+### Category B — Generous Free Tiers (Requires Free Sign-up Key)
+- **Google Cloud Vision API (`google-vision`)**: Template included in `providers/GoogleVisionProvider.js`. Provides true reverse-image web detection (`pagesWithMatchingImages`, partial crops, full web matches). **1,000 free requests per month**. Enable by adding `GOOGLE_VISION_API_KEY` to `.env`.
+- **SerpApi (Google Lens / Yandex)**: Scraped search engine proxy with 100 free searches/month for programmatic Google Lens and Yandex visual lookup.
+- **Picarta.ai**: AI visual geolocation predicting city, country, and geographic coordinates from visual terrain, architecture, and flora.
+
+### Category C — Self-Hosted / Local AI Sidecars (Zero Cloud Dependency)
+- **Local ONNX / Transformers CLIP Embeddings (Phase 3)**: CPU/GPU local vector embeddings for semantic concept matching without external network calls.
+- **Forensic Error Level Analysis (ELA)**: Local compression variance detection for digital image forgery and tampering analysis.
+
+### OSINT Tradecraft & Reference Knowledge Base
+For investigative workflows, multi-engine reverse pivots, and forensic tradecraft, Saka-irs references and aligns with the curated community directory:
+- 🔗 **[The-Osint-Toolbox / Image-Research-OSINT](https://github.com/The-Osint-Toolbox/Image-Research-OSINT)** — An extensive living library of image OSINT tools covering reverse search engines, AI geolocation, facial intelligence, and forensic verification.
+- **OPSEC Advantage:** While cloud OSINT tools risk exposing sensitive queries or training external models, Saka-irs processes searches locally first and strictly strips EXIF and GPS coordinates before any external provider dispatch.
 
 ## Documentation
 

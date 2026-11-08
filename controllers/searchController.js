@@ -24,7 +24,8 @@ const search = [upload, validateImageUpload, async (req, res, next) => {
             queryImageId: staged.queryImageId,
             hashes: staged.hashes,
             contentHash: staged.contentHash,
-            hints: sanitizeHints(req.body)
+            hints: sanitizeHints(req.body),
+            originalName: req.upload ? req.upload.originalName : null
         });
 
         payload.searchId = staged.queryImageId;

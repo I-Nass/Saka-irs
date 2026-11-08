@@ -48,7 +48,37 @@
         }
         Saka.state.file = file;
         setPreview(file);
+
+        // Smart UX: auto-populate keyword hint if empty and filename has meaningful words
+        if (file.name && form.elements.keyword && !form.elements.keyword.value.trim()) {
+            const cleaned = file.name
+                .replace(/\.[a-z0-9]+$/i, '')
+                .replace(/[-_+]/g, ' ')
+                .replace(/[^a-zA-Z0-9\s]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            const isGeneric = /^(img|dsc|photo|image|screenshot|pxl|sample)[\s\d_-]*$/i.test(cleaned);
+            if (!isGeneric && cleaned.length >= 3) {
+                form.elements.keyword.value = cleaned;
+            }
+        }
     }
+
+    /* ── Clipboard Paste (Ctrl+V) ────────────────────────── */
+    window.addEventListener('paste', function (e) {
+        if (!e.clipboardData || !e.clipboardData.items) return;
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+            const item = e.clipboardData.items[i];
+            if (item.type && item.type.indexOf('image/') === 0) {
+                const file = item.getAsFile();
+                if (file) {
+                    acceptFile(file);
+                    Saka.setStatus('Image pasted from clipboard ✓', 'info');
+                    break;
+                }
+            }
+        }
+    });
 
     /* ── Events ──────────────────────────────────────────── */
 
@@ -86,7 +116,7 @@
         if (Saka.state.busy || !Saka.state.file) return;
 
         const actionButton = e.submitter || document.querySelector('#saka-form button:focus') ||
-                             form.querySelector('button[data-action="search"]');
+            form.querySelector('button[data-action="search"]');
         const action = actionButton ? actionButton.getAttribute('data-action') : 'search';
 
         const formData = new FormData();

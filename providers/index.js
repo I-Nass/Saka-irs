@@ -5,8 +5,14 @@
  */
 
 const LocalHashProvider = require('./LocalHashProvider');
+const OpenverseCorpusProvider = require('./OpenverseCorpusProvider');
+const GoogleVisionProvider = require('./GoogleVisionProvider');
 
-const PROVIDERS = [LocalHashProvider];
+const PROVIDERS = [
+    LocalHashProvider,
+    OpenverseCorpusProvider,
+    GoogleVisionProvider
+];
 
 function allProviders() {
     return PROVIDERS;

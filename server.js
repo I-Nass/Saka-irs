@@ -10,6 +10,11 @@
 
 require('dotenv').config();
 
+const dns = require('dns');
+try {
+    dns.setDefaultResultOrder('ipv4first');
+} catch { /* Node fallback */ }
+
 const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
@@ -32,7 +37,7 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'"],
             styleSrc: ["'self'"],
-            imgSrc: ["'self'", 'data:', 'blob:']
+            imgSrc: ["'self'", 'data:', 'blob:', 'https:']
         }
     }
 }));

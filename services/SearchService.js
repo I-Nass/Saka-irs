@@ -56,14 +56,21 @@ async function search(input) {
     providers.forEach((provider, i) => {
         const outcome = settled[i];
         if (outcome.status === 'fulfilled') {
-            const arr = Array.isArray(outcome.value) ? outcome.value : [];
-            fulfilledArrays.push(arr);
-            providerStatus[provider.name] = {
-                status: 'ok',
-                resultCount: arr.length,
-                durationMs: outcome.value.providerDurationMs || undefined
-            };
-            okCount++;
+            if (outcome.value && outcome.value.skipped) {
+                providerStatus[provider.name] = {
+                    status: 'skipped',
+                    reason: outcome.value.reason || 'skipped'
+                };
+            } else {
+                const arr = Array.isArray(outcome.value) ? outcome.value : [];
+                fulfilledArrays.push(arr);
+                providerStatus[provider.name] = {
+                    status: 'ok',
+                    resultCount: arr.length,
+                    durationMs: outcome.value ? outcome.value.providerDurationMs : undefined
+                };
+                okCount++;
+            }
         } else {
             providerStatus[provider.name] = {
                 status: 'failed',
