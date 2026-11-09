@@ -45,6 +45,9 @@ function categoryFor(matchType) {
         case 'visual_resemblance':
             return 'resemblance';
         case 'web_discovery':
+        case 'web_exact_match':
+        case 'web_visual_match':
+        case 'anime_scene':
         case 'corpus_match':
             return 'discovery';
         default:

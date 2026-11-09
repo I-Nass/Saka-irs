@@ -11,6 +11,8 @@
     "scripts": {
         "start": "node server.js",
         "dev": "node --watch server.js",
+        "test": "node --test \"tests/**/*.test.js\"",
+        "boot-test": "node scripts/boot-test.js",
         "benchmark": "node scripts/benchmark.js"
     },
     "dependencies": {

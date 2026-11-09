@@ -17,10 +17,12 @@
     const dzHint = document.getElementById('dropzone-hint');
     const buttons = form.querySelectorAll('button[type="submit"]');
     const btnInspect = document.getElementById('btn-inspect-forensics');
+    const btnPivot = document.getElementById('btn-pivot');
 
     function setButtonsEnabled(enabled) {
         buttons.forEach(function (b) { b.disabled = !enabled; });
         if (btnInspect) btnInspect.disabled = !enabled;
+        if (btnPivot) btnPivot.disabled = !enabled;
     }
 
     function setPreview(file) {

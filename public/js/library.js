@@ -65,6 +65,9 @@
             b.setAttribute('data-meta-id', img.id);
         });
 
+        const pivotBtn = card.querySelector('[data-role="pivot"]');
+        if (pivotBtn) pivotBtn.setAttribute('data-pivot-id', img.id);
+
         card.querySelector('[data-role="delete"]').addEventListener('click', function () {
             if (!window.confirm('Delete "' + (img.originalName || 'this image') + '" from the library?')) return;
             fetch('/api/images/' + encodeURIComponent(img.id), { method: 'DELETE' })

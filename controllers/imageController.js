@@ -7,6 +7,7 @@ const fs = require('fs/promises');
 
 const StorageService = require('../services/StorageService');
 const ImageService = require('../services/ImageService');
+const PivotService = require('../services/PivotService');
 const { sanitizeHints } = require('../utils/sanitize');
 const { generateELA } = require('../utils/forensics');
 
@@ -88,6 +89,45 @@ async function getForensicELA(req, res, next) {
     }
 }
 
+/**
+ * GET /api/pivot/engines — the manual reverse-image pivot targets.
+ *
+ * Served from the backend so the UI and the docs cannot drift apart, and so a
+ * new engine is a one-line change on the server.
+ */
+function getPivotEngines(_req, res) {
+    return res.json({
+        engines: PivotService.ENGINES,
+        note: PivotService.NOTE,
+        maxDimension: PivotService.PIVOT_MAX_DIM
+    });
+}
+
+/**
+ * GET /api/images/:id/pivot.png — metadata-stripped PNG for a manual pivot.
+ *
+ * Generated on demand (no new storage directory means nothing for the
+ * retention sweeper to miss) and never cached beyond the browser, because the
+ * point is to hand the user the newest sanitized copy.
+ */
+async function getPivotImage(req, res, next) {
+    try {
+        const doc = await ImageService.getImageDoc(req.params.id);
+        const targetPath = doc.storagePath || doc.thumbnailPath;
+        if (!targetPath) {
+            return res.status(404).json({ error: { status: 404, message: 'Image file not found.' } });
+        }
+
+        const buffer = await fs.readFile(targetPath);
+        const png = await PivotService.renderPivotPng(buffer);
+
+        res.set('Cache-Control', 'private, max-age=300');
+        return res.type('image/png').send(png);
+    } catch (err) {
+        return next(err);
+    }
+}
+
 /** POST /api/forensics/ela — direct ELA generation from upload. */
 async function computeUploadELA(req, res, next) {
     try {
@@ -110,5 +150,7 @@ module.exports = {
     deleteImage,
     listImages,
     getForensicELA,
-    computeUploadELA
+    computeUploadELA,
+    getPivotEngines,
+    getPivotImage
 };

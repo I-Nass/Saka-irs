@@ -8,6 +8,8 @@ node_modules/
 storage/
 !storage/.gitkeep
 
+.freebuff
+
 # Logs & OS noise
 *.log
 npm-debug.log*

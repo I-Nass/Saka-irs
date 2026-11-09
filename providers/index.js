@@ -7,12 +7,17 @@
 const LocalHashProvider = require('./LocalHashProvider');
 const OpenverseCorpusProvider = require('./OpenverseCorpusProvider');
 const WikimediaCorpusProvider = require('./WikimediaCorpusProvider');
+const TraceMoeProvider = require('./TraceMoeProvider');
+const SerpApiProvider = require('./SerpApiProvider');
 const GoogleVisionProvider = require('./GoogleVisionProvider');
 
+// Fast local first, then free corpora, then metered external lookups.
 const PROVIDERS = [
     LocalHashProvider,
     OpenverseCorpusProvider,
     WikimediaCorpusProvider,
+    TraceMoeProvider,
+    SerpApiProvider,
     GoogleVisionProvider
 ];
 

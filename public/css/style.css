@@ -1276,3 +1276,116 @@ body {
     background: var(--bad);
     box-shadow: 0 0 8px rgba(248, 81, 73, .4);
 }
+
+/* Reverse-image pivot dialog */
+.pivot-dialog {
+    width: min(520px, calc(100vw - 2rem));
+    border: 1px solid var(--panel-edge);
+    border-radius: 14px;
+    background: var(--panel);
+    color: var(--text);
+    padding: 1.1rem 1.2rem 1.2rem;
+}
+
+.pivot-dialog::backdrop {
+    background: rgba(5, 8, 12, .7);
+    backdrop-filter: blur(3px);
+}
+
+.pivot-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .5rem;
+}
+
+.pivot-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.pivot-status {
+    margin: 0 0 .8rem;
+    font-size: .78rem;
+    color: var(--muted);
+}
+
+.pivot-status.ok {
+    color: var(--ok);
+}
+
+.pivot-status.warn {
+    color: var(--warn);
+}
+
+.pivot-status.error {
+    color: var(--bad);
+}
+
+.pivot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .55rem;
+}
+
+.pivot-engine {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    text-align: left;
+    padding: .65rem .75rem;
+    border-radius: 10px;
+    border: 1px solid var(--panel-edge);
+    background: #0f141b;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+.pivot-engine:hover:not(:disabled) {
+    border-color: rgba(77, 163, 255, .45);
+    background: rgba(77, 163, 255, .07);
+}
+
+.pivot-engine:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.pivot-engine.is-best {
+    border-color: rgba(77, 163, 255, .35);
+}
+
+.pivot-engine-label {
+    font-size: .86rem;
+    font-weight: 600;
+}
+
+.pivot-engine-meta {
+    font-size: .71rem;
+    color: var(--muted);
+    line-height: 1.35;
+}
+
+.pivot-engine-hint {
+    font-size: .68rem;
+    color: var(--accent);
+    margin-top: .15rem;
+}
+
+.pivot-actions {
+    margin-top: .8rem;
+}
+
+.pivot-note {
+    margin: .8rem 0 0;
+    font-size: .7rem;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+@media (max-width: 560px) {
+    .pivot-grid {
+        grid-template-columns: 1fr;
+    }
+}

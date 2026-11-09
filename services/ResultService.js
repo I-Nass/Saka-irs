@@ -7,6 +7,7 @@
  */
 
 const { classifyLocalMatch, categoryFor } = require('../utils/ranking');
+const { normalizeUrl } = require('../utils/sanitize');
 
 /** Attach presentation fields to a raw provider result. */
 function normalizeResult(raw) {
@@ -50,11 +51,14 @@ function dedupeResults(results) {
     const byKey = new Map();
 
     for (const result of results) {
-        // Local targets key on imageId; external ones would key on
-        // sanitize.normalizeUrl(sourceUrl) once external providers exist.
+        // Local targets key on imageId. External ones key on the URL with query
+        // string, fragment and trailing slash removed — the same page reached
+        // through a tracking parameter must not appear twice.
         const key = result.sourceType === 'local'
             ? `id:${result.id}`
-            : `url:${(result.sourceUrl || '').toLowerCase()}`;
+            : `url:${normalizeUrl(result.sourceUrl) ||
+            normalizeUrl(result.imageUrl) ||
+            String(result.sourceUrl || result.imageUrl || '').toLowerCase()}`;
 
         if (!byKey.has(key)) {
             result.foundVia.push(result.matchMethod);

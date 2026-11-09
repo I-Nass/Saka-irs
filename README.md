@@ -42,6 +42,7 @@ The MVP ships **Phase 1**: index images into your local library, then search tha
 - 🔐 **Privacy-first metadata** — EXIF is read locally; GPS is stored as a boolean flag only, never coordinates; sanitized re-encodes strip all metadata before anything leaves the machine
 - ⏳ **Retention lifecycle** — MongoDB TTL expiry + a filesystem sweeper so no orphaned files accumulate
 - 📉 **Graceful degradation** — provider failures never fail a search; per-provider status is exposed in every response
+- 🧭 **Reverse-image pivots without an account** — a metadata-stripped PNG is copied to the clipboard and the engine (Lens · Yandex · TinEye · SauceNAO · trace.moe) opens in a tab; the browser uploads, never this server
 
 ## Tech Stack
 
@@ -107,7 +108,9 @@ node scripts/boot-test.js       # boots server & probes HTTP layer (no DB needed
 | `GET`  | `/` | Main interface (EJS shell) |
 | `POST` | `/api/images` | Index an image into the library |
 | `GET` | `/api/images/:id` | Public-safe image record |
-| `GET` | `/api/images/:id/thumbnail` | 256px WebP thumbnail |
+| `GET`  | `/api/images/:id/thumbnail` | 256px WebP thumbnail |
+| `GET`  | `/api/images/:id/pivot.png` | Metadata-stripped PNG for manual reverse-image pivots |
+| `GET`  | `/api/pivot/engines` | Pivot engine list (Lens · Yandex · TinEye · SauceNAO · trace.moe) |
 | `DELETE` | `/api/images/:id` | Remove record + owned files |
 | `POST` | `/api/search` | Run enabled providers against a query image |
 | `GET` | `/api/searches` | Recent search history (20) |
@@ -162,6 +165,12 @@ All settings live in `.env` (see `.env.example`):
 | `QUERY_RETENTION_HOURS` | `24` | Query-copy retention |
 | `MAX_FILE_SIZE_MB` | `15` | Upload size cap |
 | `MAX_PIXELS` | `50000000` | Decompression-bomb guard (~50 MP) |
+| `TRACEMOE_PROVIDER` | `false` | Automatic trace.moe lookups (anime only, ~100/day) |
+| `TRACEMOE_DAILY_LIMIT` | `100` | Local daily budget before the API is asked |
+| `SERPAPI_KEY` | `""` | Setting a key enables SerpApi Google Lens lookups (~100/month free) |
+| `PUBLIC_BASE_URL` | `""` | HTTPS origin of this app; only used by SerpApi's Yandex engine |
+| `EXTERNAL_CACHE_DAYS` | `30` | How long external results are reused (costs no quota) |
+| `PIVOT_MAX_DIM` | `1280` | Long edge of the PNG handed to Lens/Yandex/TinEye |
 
 > Thresholds are sensible starting points; calibrate them against your own content using the benchmarking plan in the documentation (§38).
 
@@ -175,13 +184,15 @@ saka-irs/
 ├── routes/                   # pageRoutes (EJS shells), apiRoutes (REST)
 ├── controllers/              # imageController, searchController
 ├── services/                 # Search, Image, Fingerprint, Metadata,
-│                             # Result, Storage — business core
-├── providers/                # LocalHashProvider + duck-typed registry
+│                             # Result, Storage, Pivot, Quota, ExternalCache
+├── providers/                # LocalHash, external corpus, wikimedia,
+│                             # tracemoe, serpapi (duck-typed registry)
 ├── middleware/               # upload, validation, requireDb, errorHandler
 ├── utils/                    # hashing (DCT pHash/dHash/aHash), hamming,
 │                             # ranking, sanitize, sweeper
 ├── views/                    # layout / index / error (shells only)
-├── public/                   # css + vanilla js (app, upload, results)
+├── public/                   # css + vanilla js (app, upload, results,
+│                             # pivot, library, history, forensics)
 ├── scripts/boot-test.js      # HTTP-layer verification
 ├── tests/smoke.test.js       # fingerprint pipeline tests (node:test)
 └── storage/                  # uploads · normalized · thumbnails · temporary
@@ -190,6 +201,8 @@ saka-irs/
 ## Privacy & Retention
 
 - Originals never leave the machine; only metadata-stripped re-encodes would ever be transmitted (and no external provider is enabled by default).
+- The pivot panel transmits nothing at all — the browser uploads the PNG under the user's own session.
+- Enabling `TRACEMOE_PROVIDER` or setting `SERPAPI_KEY` *does* send a derivative (no EXIF, no GPS, no colour profile) to that provider. SerpApi also stores a ≤500 KB JPEG on its side; both trades are opt-in.
 - GPS presence is a boolean flag — coordinates are never persisted.
 - Library images expire after `RETENTION_DAYS`; TTL removes records, the sweeper (every 30 min) removes files.
 - Temporary upload staging is cleaned on every request, success or failure.
@@ -209,6 +222,14 @@ Saka-irs runs on a duck-typed provider architecture (`providers/`). Providers ex
 ### Category A — 100% Free & Zero Key Required (Shipped & Active)
 - **Openverse Corpus Provider (`external-corpus`)**: Queries over 700 million openly licensed Creative Commons, museum, and cultural archive images using contextual hints (`keyword`, `location`, `name`) or filename fallback.
 - **Wikimedia Commons Provider (`wikimedia-corpus`)**: Queries the official Wikimedia Foundation REST API across millions of historical, encyclopedic, news, and public domain media files. Ships active out of the box with zero API keys required.
+
+### Category A+ — Reverse image (opt-in, metered, no account required for pivots)
+
+- **Pivot panel (no API, no account, no ToS risk)**: Google Lens, Yandex Images, TinEye, SauceNAO and trace.moe have no usable free API (or forbid scripted use). Instead, `GET /api/images/:id/pivot.png` renders an EXIF/GPS-stripped PNG and the client copies it to the clipboard and opens the chosen engine. The upload happens in the user's own browser session — the server never transmits the image.
+- **trace.moe (`tracemoe`)**: the only keyless *official* reverse-image API. Content-based retrieval for **anime scenes only** (series, episode, timestamp), so it ships disabled — enable with `TRACEMOE_PROVIDER=true`. Anonymous tier is small (~100 searches/day, concurrency 1), so results are cached by content hash and a local daily counter stops us before the API rate-limits us.
+- **SerpApi (`serpapi`)**: Google Lens lookups with a free 100 searches/month key (no credit card). It uploads a metadata-stripped JPEG (≤500 KB) via SerpApi's Image API, so it needs no public hosting — but note that pixels *do* leave the machine when it is enabled. Yandex is attempted only when `PUBLIC_BASE_URL` exposes the app over HTTPS, because that engine accepts a URL rather than an upload.
+
+> Metered providers are opt-in and paired with a persistent content-hash cache (`EXTERNAL_CACHE_DAYS`), so repeat searches of the same image cost no quota.
 
 ### Category B — Generous Free Tiers (Requires Free Sign-up Key)
 - **Google Cloud Vision API (`google-vision`)**: Template included in `providers/GoogleVisionProvider.js`. Provides true reverse-image web detection (`pagesWithMatchingImages`, partial crops, full web matches). **1,000 free requests per month**. Enable by adding `GOOGLE_VISION_API_KEY` to `.env`.

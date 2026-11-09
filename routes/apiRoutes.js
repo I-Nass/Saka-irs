@@ -9,16 +9,34 @@ const searchController = require('../controllers/searchController');
 const upload = require('../middleware/upload');
 const { validateImageUpload } = require('../middleware/validation');
 const requireDb = require('../middleware/requireDb');
+const QuotaService = require('../services/QuotaService');
 const { enabledProviders } = require('../providers');
 
 const router = express.Router();
 
-router.get('/health', (_req, res) => {
+router.get('/health', async (_req, res) => {
+    const providers = enabledProviders();
+
+    // Surface remaining external allowance instead of letting a spent free tier
+    // look like a broken provider. Best-effort: never fail the health check.
+    let quotas = null;
+    try {
+        const metered = providers
+            .filter((p) => typeof p.quota === 'function')
+            .map((p) => ({ name: p.name, ...p.quota() }));
+        if (metered.length > 0) quotas = await QuotaService.snapshot(metered);
+    } catch { /* quota read is informational only */ }
+
     res.json({
         ok: true,
-        providers: enabledProviders().map((p) => p.name)
+        providers: providers.map((p) => p.name),
+        quotas
     });
 });
+
+/* Reverse-image pivots — the browser uploads, this server never does */
+router.get('/pivot/engines', imageController.getPivotEngines);
+router.get('/images/:id/pivot.png', requireDb, imageController.getPivotImage);
 
 /* Index flow */
 router.get('/images', requireDb, imageController.listImages);

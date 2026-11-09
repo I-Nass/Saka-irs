@@ -67,4 +67,45 @@ function fingerprints(rawBuffer) {
     return hashing.fingerprintsFromRaw(rawBuffer);
 }
 
-module.exports = { normalize, makeThumbnail, fingerprints, RAW_SIZE };
+/**
+ * Build a small, metadata-stripped JPEG suitable for an external upload.
+ *
+ * Two hard constraints are enforced by the APIs we talk to:
+ *   trace.moe  — accepts a multipart upload of a normal photo
+ *   SerpApi     — Image API rejects anything over 500 KB (JPG/PNG/WebP)
+ *
+ * The derivative is produced by sharp WITHOUT `.withMetadata()`, so EXIF, GPS
+ * and colour profiles are gone before the bytes leave the machine (§30).
+ *
+ * @param {Buffer} originalBuffer original file bytes
+ * @param {{maxDim?:number, maxBytes?:number}} [opts]
+ * @returns {Promise<Buffer>} JPEG buffer under maxBytes
+ */
+async function makeUploadDerivative(originalBuffer, { maxDim = 900, maxBytes = 500 * 1024 } = {}) {
+    const build = (dimension, quality) => sharp(originalBuffer)
+        .rotate()
+        .flatten({ background: '#ffffff' })
+        .resize(dimension, dimension, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality })
+        .toBuffer();
+
+    // First try to keep the requested resolution and trade quality instead.
+    for (const quality of [85, 75, 65, 55, 45]) {
+        const buffer = await build(maxDim, quality);
+        if (buffer.length <= maxBytes) return buffer;
+    }
+
+    // Still too large — step the long edge down and retry.
+    let dimension = maxDim;
+    for (let step = 0; step < 4; step++) {
+        dimension = Math.max(320, Math.round(dimension * 0.7));
+        for (const quality of [80, 65, 50]) {
+            const buffer = await build(dimension, quality);
+            if (buffer.length <= maxBytes) return buffer;
+        }
+    }
+
+    throw new Error('Could not compress the image under the external upload limit.');
+}
+
+module.exports = { normalize, makeThumbnail, fingerprints, makeUploadDerivative, RAW_SIZE };
