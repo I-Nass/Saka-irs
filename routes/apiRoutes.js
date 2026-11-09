@@ -44,10 +44,13 @@ router.post('/images', requireDb, upload, validateImageUpload, imageController.i
 router.get('/images/:id', requireDb, imageController.getImage);
 router.get('/images/:id/thumbnail', requireDb, imageController.getThumbnail);
 router.get('/images/:id/ela', requireDb, imageController.getForensicELA);
+router.get('/images/:id/forensics', requireDb, imageController.getForensicELA);
 router.delete('/images/:id', requireDb, imageController.deleteImage);
 
-/* Forensics */
+/* Forensics & Content Extraction */
 router.post('/forensics/ela', upload, validateImageUpload, imageController.computeUploadELA);
+router.post('/forensics/analysis', upload, validateImageUpload, imageController.computeUploadELA);
+router.post('/forensics/autohints', upload, validateImageUpload, imageController.getAutoHints);
 
 /* Search flow */
 router.post('/search', requireDb, ...searchController.search);

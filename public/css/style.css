@@ -1389,3 +1389,78 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Forensics Tabs */
+.forensics-tabs {
+    display: flex;
+    gap: .5rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+.forensics-tab {
+    background: #0f141b;
+    border: 1px solid var(--panel-edge);
+    color: var(--muted);
+    padding: .45rem .85rem;
+    border-radius: 8px;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+.forensics-tab:hover {
+    color: var(--text);
+    border-color: rgba(77, 163, 255, .4);
+}
+
+.forensics-tab.is-active {
+    background: rgba(77, 163, 255, .12);
+    border-color: var(--accent);
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Auto-hints bar */
+.autohints-bar {
+    margin: .8rem 0;
+    padding: .6rem .8rem;
+    background: rgba(77, 163, 255, .05);
+    border: 1px dashed rgba(77, 163, 255, .3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+    font-size: .8rem;
+}
+
+.autohints-label {
+    color: var(--muted);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.autohints-chips {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+}
+
+.autohint-chip {
+    background: #151b23;
+    border: 1px solid var(--panel-edge);
+    padding: .2rem .55rem;
+    border-radius: 12px;
+    font-size: .74rem;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+}
+
+.autohint-chip .chip-tag {
+    color: var(--accent);
+    font-weight: 500;
+}

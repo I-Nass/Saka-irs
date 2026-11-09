@@ -5,17 +5,21 @@
  */
 
 const LocalHashProvider = require('./LocalHashProvider');
+const GeoOsintProvider = require('./GeoOsintProvider');
 const OpenverseCorpusProvider = require('./OpenverseCorpusProvider');
 const WikimediaCorpusProvider = require('./WikimediaCorpusProvider');
+const INaturalistProvider = require('./INaturalistProvider');
 const TraceMoeProvider = require('./TraceMoeProvider');
 const SerpApiProvider = require('./SerpApiProvider');
 const GoogleVisionProvider = require('./GoogleVisionProvider');
 
-// Fast local first, then free corpora, then metered external lookups.
+// Fast local first, specialized OSINT & taxonomy, free corpora, then metered lookups.
 const PROVIDERS = [
     LocalHashProvider,
+    GeoOsintProvider,
     OpenverseCorpusProvider,
     WikimediaCorpusProvider,
+    INaturalistProvider,
     TraceMoeProvider,
     SerpApiProvider,
     GoogleVisionProvider

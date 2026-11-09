@@ -44,6 +44,9 @@ function categoryFor(matchType) {
         case 'visually_similar':
         case 'visual_resemblance':
             return 'resemblance';
+        case 'geo_prediction':
+        case 'species_match':
+            return 'specialized';
         case 'web_discovery':
         case 'web_exact_match':
         case 'web_visual_match':

@@ -5,6 +5,7 @@
 const Search = require('../models/Search');
 const SearchService = require('../services/SearchService');
 const ImageService = require('../services/ImageService');
+const AutoHintService = require('../services/AutoHintService');
 const { isDbReady } = require('../config/db');
 const { validateImageUpload } = require('../middleware/validation');
 const upload = require('../middleware/upload');
@@ -20,16 +21,30 @@ const search = [upload, validateImageUpload, async (req, res, next) => {
         }
 
         const staged = await ImageService.stageQuery(req.upload);
+        const userHints = sanitizeHints(req.body);
+
+        // Auto-infer hints if the user didn't supply a keyword
+        const autoHints = await AutoHintService.inferHints(
+            req.upload ? req.upload.buffer : null,
+            req.upload ? req.upload.originalName : ''
+        );
+
+        const effectiveHints = { ...userHints };
+        if (!effectiveHints.keyword && autoHints.combinedHint) {
+            effectiveHints.keyword = autoHints.combinedHint;
+        }
+
         const payload = await SearchService.search({
             queryImageId: staged.queryImageId,
             hashes: staged.hashes,
             contentHash: staged.contentHash,
-            hints: sanitizeHints(req.body),
+            hints: effectiveHints,
             originalName: req.upload ? req.upload.originalName : null
         });
 
         payload.searchId = staged.queryImageId;
         payload.queryImage = { id: staged.queryImageId };
+        payload.autoHints = autoHints;
 
         return res.json(payload);
     } catch (err) {

@@ -91,9 +91,11 @@ function sortResults(results) {
 
 /** Group into §26 UI categories with counts. */
 function groupResults(results) {
-    const grouped = { duplicates: [], resemblance: [], discovery: [] };
+    const grouped = { duplicates: [], resemblance: [], specialized: [], discovery: [] };
     for (const result of results) {
-        grouped[categoryFor(result.matchType)].push(result);
+        const cat = categoryFor(result.matchType) || 'discovery';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(result);
     }
     return grouped;
 }

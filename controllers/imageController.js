@@ -8,8 +8,21 @@ const fs = require('fs/promises');
 const StorageService = require('../services/StorageService');
 const ImageService = require('../services/ImageService');
 const PivotService = require('../services/PivotService');
+const AutoHintService = require('../services/AutoHintService');
 const { sanitizeHints } = require('../utils/sanitize');
-const { generateELA } = require('../utils/forensics');
+const { generateELA, generateNoiseAnalysis, generateLuminanceGradient } = require('../utils/forensics');
+
+async function dispatchForensic(buffer, type, { quality, scale }) {
+    switch (type) {
+        case 'noise':
+            return generateNoiseAnalysis(buffer, { scale });
+        case 'luminance':
+            return generateLuminanceGradient(buffer);
+        case 'ela':
+        default:
+            return generateELA(buffer, { quality, scale });
+    }
+}
 
 /** POST /api/images — add an image to the indexed library. */
 async function indexImage(req, res, next) {
@@ -71,7 +84,7 @@ async function listImages(req, res, next) {
     }
 }
 
-/** GET /api/images/:id/ela — generate & serve Error Level Analysis for a stored image. */
+/** GET /api/images/:id/ela (or /forensics) — generate & serve forensic analysis for a stored image. */
 async function getForensicELA(req, res, next) {
     try {
         const doc = await ImageService.getImageDoc(req.params.id);
@@ -80,10 +93,11 @@ async function getForensicELA(req, res, next) {
             return res.status(404).json({ error: { status: 404, message: 'Image file not found.' } });
         }
         const buffer = await fs.readFile(targetPath);
+        const type = String(req.query.type || 'ela').toLowerCase();
         const quality = Math.min(100, Math.max(50, parseInt(req.query.quality, 10) || 90));
         const scale = Math.min(50, Math.max(1, parseInt(req.query.scale, 10) || 20));
-        const elaBuffer = await generateELA(buffer, { quality, scale });
-        res.type('image/webp').send(elaBuffer);
+        const outBuffer = await dispatchForensic(buffer, type, { quality, scale });
+        res.type('image/webp').send(outBuffer);
     } catch (err) {
         return next(err);
     }
@@ -128,16 +142,30 @@ async function getPivotImage(req, res, next) {
     }
 }
 
-/** POST /api/forensics/ela — direct ELA generation from upload. */
+/** POST /api/forensics/ela (or /forensics/analysis) — direct forensic analysis from upload. */
 async function computeUploadELA(req, res, next) {
     try {
         if (!req.upload || !req.upload.buffer) {
             return res.status(400).json({ error: { status: 400, message: 'No image uploaded.' } });
         }
+        const type = String(req.body.type || req.query.type || 'ela').toLowerCase();
         const quality = Math.min(100, Math.max(50, parseInt(req.body.quality, 10) || 90));
         const scale = Math.min(50, Math.max(1, parseInt(req.body.scale, 10) || 20));
-        const elaBuffer = await generateELA(req.upload.buffer, { quality, scale });
-        res.type('image/webp').send(elaBuffer);
+        const outBuffer = await dispatchForensic(req.upload.buffer, type, { quality, scale });
+        res.type('image/webp').send(outBuffer);
+    } catch (err) {
+        return next(err);
+    }
+}
+
+/** POST /api/forensics/autohints — quick probe of detected semantic cues for live upload. */
+async function getAutoHints(req, res, next) {
+    try {
+        if (!req.upload || !req.upload.buffer) {
+            return res.status(400).json({ error: { status: 400, message: 'No image uploaded.' } });
+        }
+        const hints = await AutoHintService.inferHints(req.upload.buffer, req.upload.originalName);
+        return res.json(hints);
     } catch (err) {
         return next(err);
     }
@@ -152,5 +180,6 @@ module.exports = {
     getForensicELA,
     computeUploadELA,
     getPivotEngines,
-    getPivotImage
+    getPivotImage,
+    getAutoHints
 };

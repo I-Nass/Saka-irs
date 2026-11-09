@@ -34,15 +34,18 @@ The MVP ships **Phase 1**: index images into your local library, then search tha
 
 ## Features
 
-- 🖼️ **Two explicit flows** — *Add to Library* (`POST /api/images`) and *Search* (`POST /api/search`)
-- 🔎 **Perceptual fingerprinting** — in-house DCT pHash + grid dHash + block aHash, all computed from one normalized pixel buffer
-- 🏷️ **Honest classification** — `exact duplicate · near duplicate · visually similar` with Strong / Moderate / Weak confidence buckets
-- 🧩 **Provider architecture** — pluggable search sources behind one contract; runs fully offline with only the local provider enabled
-- 🛡️ **Hardened ingestion** — magic-byte validation, decode proof, decompression-bomb cap, UUID filenames, rate limiting, helmet headers
-- 🔐 **Privacy-first metadata** — EXIF is read locally; GPS is stored as a boolean flag only, never coordinates; sanitized re-encodes strip all metadata before anything leaves the machine
-- ⏳ **Retention lifecycle** — MongoDB TTL expiry + a filesystem sweeper so no orphaned files accumulate
-- 📉 **Graceful degradation** — provider failures never fail a search; per-provider status is exposed in every response
-- 🧭 **Reverse-image pivots without an account** — a metadata-stripped PNG is copied to the clipboard and the engine (Lens · Yandex · TinEye · SauceNAO · trace.moe) opens in a tab; the browser uploads, never this server
+- **Two explicit flows** — *Add to Library* (`POST /api/images`) and *Search* (`POST /api/search`)
+- **Perceptual fingerprinting** — in-house DCT pHash + grid dHash + block aHash, all computed from one normalized pixel buffer
+- **Honest classification** — `exact duplicate · near duplicate · visually similar` with Strong / Moderate / Weak confidence buckets
+- **Provider architecture** — pluggable search sources behind one contract; runs fully offline with only the local provider enabled
+- **Hardened ingestion** — magic-byte validation, decode proof, decompression-bomb cap, UUID filenames, rate limiting, helmet headers
+- **Privacy-first metadata** — EXIF is read locally; GPS is stored as a boolean flag only, never coordinates; sanitized re-encodes strip all metadata before anything leaves the machine
+- **Retention lifecycle** — MongoDB TTL expiry + a filesystem sweeper so no orphaned files accumulate
+- **Graceful degradation** — provider failures never fail a search; per-provider status is exposed in every response
+- **Reverse-image pivots without an account** — a metadata-stripped PNG is copied to the clipboard and the engine (Lens · Yandex · TinEye · SauceNAO · trace.moe) opens in a tab; the browser uploads, never this server
+- **Offline Forensic Suite** — Interactive Error Level Analysis (ELA), Sensor Noise Inconsistency mapping (PRNU / Laplacian high-pass), and Directional Luminance Gradient analysis
+- **Local Auto-Hinting & Content Extraction** — Automatically infers search terms from filenames, EXIF/IPTC metadata captions, and visual color biome distribution without typing
+- **Specialized Domain & Geo-OSINT** — Regional origin prediction, environmental climate/biome classification, and optional biological species identification (iNaturalist)
 
 ## Tech Stack
 
@@ -209,7 +212,7 @@ saka-irs/
 
 ## Roadmap
 
-- **Phase 1 ✅** — local visual history matching *(this repo)*
+- **Phase 1 [Complete]** — local visual history matching *(this repo)*
 - **Phase 1.5** — external reverse-image discovery (ToS-compliant API required)
 - **Phase 2** — feature matching for crops/partial images (OpenCV ORB/SIFT)
 - **Phase 3** — semantic visual search (CLIP embeddings + vector DB)
@@ -222,6 +225,8 @@ Saka-irs runs on a duck-typed provider architecture (`providers/`). Providers ex
 ### Category A — 100% Free & Zero Key Required (Shipped & Active)
 - **Openverse Corpus Provider (`external-corpus`)**: Queries over 700 million openly licensed Creative Commons, museum, and cultural archive images using contextual hints (`keyword`, `location`, `name`) or filename fallback.
 - **Wikimedia Commons Provider (`wikimedia-corpus`)**: Queries the official Wikimedia Foundation REST API across millions of historical, encyclopedic, news, and public domain media files. Ships active out of the box with zero API keys required.
+- **Geo-OSINT Provider (`geo-osint`)**: Local environmental biome and timezone classifier predicting candidate regions, climate zones, and geographic cues without external network requests.
+- **Biological Taxonomy Provider (`inaturalist`)**: Connects to the official open computer vision API of iNaturalist (California Academy of Sciences & NatGeo) for flora, fauna, insect, and fungal taxonomy (opt-in via `INATURALIST_PROVIDER=true`).
 
 ### Category A+ — Reverse image (opt-in, metered, no account required for pivots)
 
@@ -237,12 +242,16 @@ Saka-irs runs on a duck-typed provider architecture (`providers/`). Providers ex
 - **Picarta.ai**: AI visual geolocation predicting city, country, and geographic coordinates from visual terrain, architecture, and flora.
 
 ### Category C — Self-Hosted / Local AI Sidecars (Zero Cloud Dependency)
-- **Forensic Error Level Analysis (ELA)**: Local compression variance detection (`utils/forensics.js`) using `sharp` to recreate FotoForensics 100% offline. Computes absolute difference against a uniform lossy baseline to highlight cloned, edited, or spliced areas.
+- **Local Digital Forensics Suite**: 100% offline image tampering analysis (`utils/forensics.js`) using `sharp`:
+  - **Error Level Analysis (ELA)**: Re-compression delta matrix revealing edited or inserted regions.
+  - **Sensor Noise Map**: High-pass Laplacian convolution isolating sensor grain (PRNU) to expose airbrushed or cloned areas.
+  - **Luminance Gradient**: Sobel directional lighting operators highlighting conflicting illumination vectors.
+- **Local Auto-Hinting Engine (`services/AutoHintService.js`)**: Intelligent filename tokenization, IPTC/EXIF caption harvesting, and dominant color biome detection.
 - **Local ONNX / Transformers CLIP Embeddings (Phase 3)**: CPU/GPU local vector embeddings for semantic concept matching without external network calls.
 
 ### OSINT Tradecraft & Reference Knowledge Base
 For investigative workflows, multi-engine reverse pivots, and forensic tradecraft, Saka-irs references and aligns with the curated community directory:
-- 🔗 **[The-Osint-Toolbox / Image-Research-OSINT](https://github.com/The-Osint-Toolbox/Image-Research-OSINT)** — An extensive living library of image OSINT tools covering reverse search engines, AI geolocation, facial intelligence, and forensic verification.
+- **[The-Osint-Toolbox / Image-Research-OSINT](https://github.com/The-Osint-Toolbox/Image-Research-OSINT)** — An extensive living library of image OSINT tools covering reverse search engines, AI geolocation, facial intelligence, and forensic verification.
 - **OPSEC Advantage:** While cloud OSINT tools risk exposing sensitive queries or training external models, Saka-irs processes searches locally first and strictly strips EXIF and GPS coordinates before any external provider dispatch.
 
 ## Documentation

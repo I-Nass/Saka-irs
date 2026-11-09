@@ -18,6 +18,8 @@
     const buttons = form.querySelectorAll('button[type="submit"]');
     const btnInspect = document.getElementById('btn-inspect-forensics');
     const btnPivot = document.getElementById('btn-pivot');
+    const autoBar = document.getElementById('autohints-bar');
+    const autoChips = document.getElementById('autohints-chips');
 
     function setButtonsEnabled(enabled) {
         buttons.forEach(function (b) { b.disabled = !enabled; });
@@ -33,6 +35,7 @@
         if (!file) {
             Saka.hide(preview);
             Saka.show(dzHint);
+            if (autoBar) autoBar.classList.add('hidden');
             setButtonsEnabled(false);
             return;
         }
@@ -44,6 +47,39 @@
         Saka.clearStatus();
     }
 
+    function probeAutoHints(file) {
+        if (!autoBar || !autoChips || !file) return;
+        autoChips.innerHTML = '<span class="autohint-chip">Scanning cues…</span>';
+        autoBar.classList.remove('hidden');
+
+        const fd = new FormData();
+        fd.append('image', file);
+        fetch('/api/forensics/autohints', { method: 'POST', body: fd })
+            .then(function (res) { return res.ok ? res.json() : null; })
+            .then(function (data) {
+                if (!data) {
+                    autoBar.classList.add('hidden');
+                    return;
+                }
+                const chips = [];
+                (data.keywords || []).forEach(function (k) {
+                    chips.push('<span class="autohint-chip"><span class="chip-tag">#</span>' + (k || '') + '</span>');
+                });
+                (data.environment || []).forEach(function (env) {
+                    chips.push('<span class="autohint-chip">🌿 ' + (env || '') + '</span>');
+                });
+                if (chips.length > 0) {
+                    autoChips.innerHTML = chips.join('');
+                    autoBar.classList.remove('hidden');
+                } else {
+                    autoBar.classList.add('hidden');
+                }
+            })
+            .catch(function () {
+                autoBar.classList.add('hidden');
+            });
+    }
+
     function acceptFile(file) {
         if (!file) return;
         if (file.type && file.type.indexOf('image/') !== 0) {
@@ -52,6 +88,7 @@
         }
         Saka.state.file = file;
         setPreview(file);
+        probeAutoHints(file);
 
         // Smart UX: auto-populate keyword hint if empty and filename has meaningful words
         if (file.name && form.elements.keyword && !form.elements.keyword.value.trim()) {

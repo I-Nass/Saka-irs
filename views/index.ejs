@@ -47,6 +47,11 @@
             <input type="file" id="image-input" name="image" accept="image/*" hidden>
         </div>
 
+        <div id="autohints-bar" class="autohints-bar hidden">
+            <span class="autohints-label">Detected image cues:</span>
+            <div id="autohints-chips" class="autohints-chips"></div>
+        </div>
+
         <fieldset class="hints">
             <legend>Contextual hints (optional — drives external archive discovery)</legend>
             <div class="hint-grid">
@@ -86,18 +91,27 @@
 <section class="panel hidden" id="forensics-panel">
     <div class="panel-header-row">
         <div>
-            <h2>Digital Forensics · Error Level Analysis (ELA)</h2>
-            <p class="muted">Recreates the FotoForensics methodology 100% offline. Highlights JPEG compression variance
+            <h2>Digital Forensics & Tampering Analysis</h2>
+            <p class="muted" id="forensics-description">Recreates the FotoForensics methodology 100% offline. Highlights
+                JPEG compression variance
                 to expose image splicing, cloned regions, and digital tampering.</p>
         </div>
         <span class="badge badge-accent">Offline Forensic Engine</span>
+    </div>
+
+    <div class="forensics-tabs">
+        <button type="button" class="btn btn-secondary btn-sm forensics-tab is-active" data-tool="ela">Error Level
+            Analysis (ELA)</button>
+        <button type="button" class="btn btn-secondary btn-sm forensics-tab" data-tool="noise">Sensor Noise Map</button>
+        <button type="button" class="btn btn-secondary btn-sm forensics-tab" data-tool="luminance">Luminance
+            Gradient</button>
     </div>
 
     <div class="forensics-workbench">
         <div class="forensics-viewer-box">
             <div class="comparison-container" id="ela-comparison">
                 <img id="ela-base-img" class="comp-img comp-base" alt="Original Image">
-                <img id="ela-heat-img" class="comp-img comp-overlay" alt="ELA Heat Map">
+                <img id="ela-heat-img" class="comp-img comp-overlay" alt="Forensic Overlay">
                 <div class="comparison-divider" id="comp-divider">
                     <div class="divider-handle">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
@@ -106,7 +120,7 @@
                     </div>
                 </div>
                 <div class="comp-label label-left">Original</div>
-                <div class="comp-label label-right">ELA Heat Map</div>
+                <div class="comp-label label-right" id="comp-label-overlay">ELA Heat Map</div>
             </div>
 
             <div class="comparison-toolbar">

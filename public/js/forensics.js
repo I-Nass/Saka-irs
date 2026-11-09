@@ -1,6 +1,10 @@
 /**
- * Saka-irs client — Digital Forensics (ELA) Workspace (Layout 3).
- * Interactive A/B split slider, parameters adjustment, and live tampering analysis.
+ * Saka-irs client — Digital Forensics & Tampering Workspace (Layout 3).
+ * Interactive A/B split slider, parameters adjustment, and live tampering analysis
+ * covering:
+ *   - Error Level Analysis (ELA)
+ *   - Sensor Noise Inconsistency / Residual Mapping
+ *   - Directional Luminance Gradient Analysis
  */
 (function () {
     'use strict';
@@ -20,18 +24,42 @@
     const btnToggle = document.getElementById('btn-toggle-view');
     const btnRecompute = document.getElementById('btn-recompute-ela');
     const btnInspect = document.getElementById('btn-inspect-forensics');
+    const compLabelOverlay = document.getElementById('comp-label-overlay');
+    const descEl = document.getElementById('forensics-description');
+    const tabButtons = panel.querySelectorAll('.forensics-tab');
 
     let currentSource = null; // { file } or { imageId }
+    let currentTool = 'ela'; // 'ela' | 'noise' | 'luminance'
     let isDragging = false;
     let dividerPos = 50; // percentage
     let isFullHeatmap = false;
+
+    const TOOL_CONFIG = {
+        ela: {
+            label: 'ELA Heat Map',
+            description: 'Recreates the FotoForensics methodology 100% offline. Highlights JPEG compression variance to expose image splicing, cloned regions, and digital tampering.',
+            hasQuality: true,
+            hasScale: true
+        },
+        noise: {
+            label: 'Sensor Noise Map',
+            description: 'Isolates high-frequency sensor noise grain (PRNU). Spliced objects, healing-brush retouches, or smoothed patches show up as distinct dark dead zones or mismatched grain.',
+            hasQuality: false,
+            hasScale: true
+        },
+        luminance: {
+            label: 'Luminance Gradient',
+            description: 'Computes 2D Sobel directional lighting vectors. Inconsistent shadow directions or light source angles on composited subjects stand out in contrasting hues.',
+            hasQuality: false,
+            hasScale: false
+        }
+    };
 
     /* ── Split Slider Engine ─────────────────────────────── */
 
     function updateDivider(percent) {
         dividerPos = Math.max(0, Math.min(100, percent));
         divider.style.left = dividerPos + '%';
-        // Clip the heatmap overlay from the left divider position to 100%
         heatImg.style.clipPath = 'polygon(' + dividerPos + '% 0%, 100% 0%, 100% 100%, ' + dividerPos + '% 100%)';
     }
 
@@ -66,6 +94,27 @@
         onPointerMove(e);
     }, { passive: true });
 
+    /* ── Tool Tabs ───────────────────────────────────────── */
+
+    tabButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const tool = btn.getAttribute('data-tool');
+            if (!tool || tool === currentTool) return;
+            currentTool = tool;
+
+            tabButtons.forEach(function (b) { b.classList.remove('is-active'); });
+            btn.classList.add('is-active');
+
+            const cfg = TOOL_CONFIG[tool] || TOOL_CONFIG.ela;
+            if (compLabelOverlay) compLabelOverlay.textContent = cfg.label;
+            if (descEl) descEl.textContent = cfg.description;
+            if (qualitySelect) qualitySelect.parentElement.style.display = cfg.hasQuality ? '' : 'none';
+            if (scaleSelect) scaleSelect.parentElement.style.display = cfg.hasScale ? '' : 'none';
+
+            if (currentSource) computeForensic(currentSource);
+        });
+    });
+
     /* ── View Controls ───────────────────────────────────── */
 
     btnToggle.addEventListener('click', function () {
@@ -77,17 +126,17 @@
         } else {
             divider.classList.remove('hidden');
             updateDivider(50);
-            btnToggle.textContent = 'Show Full ELA';
+            btnToggle.textContent = 'Show Full Overlay';
         }
     });
 
     btnRecompute.addEventListener('click', function () {
-        if (currentSource) computeELA(currentSource);
+        if (currentSource) computeForensic(currentSource);
     });
 
     /* ── Computation & Fetching ──────────────────────────── */
 
-    function computeELA(source) {
+    function computeForensic(source) {
         currentSource = source;
         const quality = qualitySelect ? qualitySelect.value : '90';
         const scale = scaleSelect ? scaleSelect.value : '20';
@@ -99,15 +148,15 @@
         let fetchPromise;
 
         if (source.imageId) {
-            // Fetch from stored image endpoint
             baseImg.src = '/api/images/' + encodeURIComponent(source.imageId) + '/thumbnail';
-            const elaUrl = '/api/images/' + encodeURIComponent(source.imageId) + '/ela?quality=' + quality + '&scale=' + scale;
-            fetchPromise = fetch(elaUrl).then(function (res) {
-                if (!res.ok) throw new Error('Failed to generate ELA.');
+            const url = '/api/images/' + encodeURIComponent(source.imageId) +
+                '/forensics?type=' + encodeURIComponent(currentTool) +
+                '&quality=' + quality + '&scale=' + scale;
+            fetchPromise = fetch(url).then(function (res) {
+                if (!res.ok) throw new Error('Forensic analysis failed (HTTP ' + res.status + ').');
                 return res.blob();
             });
         } else if (source.file) {
-            // Direct upload computation
             if (Saka.state && Saka.state.previewUrl) {
                 baseImg.src = Saka.state.previewUrl;
             } else {
@@ -116,14 +165,15 @@
 
             const formData = new FormData();
             formData.append('image', source.file);
+            formData.append('type', currentTool);
             formData.append('quality', quality);
             formData.append('scale', scale);
 
-            fetchPromise = fetch('/api/forensics/ela', {
+            fetchPromise = fetch('/api/forensics/analysis', {
                 method: 'POST',
                 body: formData
             }).then(function (res) {
-                if (!res.ok) throw new Error('Forensic analysis failed.');
+                if (!res.ok) throw new Error('Forensic analysis failed (HTTP ' + res.status + ').');
                 return res.blob();
             });
         }
@@ -140,7 +190,7 @@
                     updateDivider(50);
                 })
                 .catch(function (err) {
-                    if (Saka.setStatus) Saka.setStatus('Forensic ELA error: ' + err.message, 'error');
+                    if (Saka.setStatus) Saka.setStatus('Forensics error: ' + err.message, 'error');
                 })
                 .finally(function () {
                     btnRecompute.disabled = false;
@@ -151,14 +201,14 @@
         panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    Saka.openForensics = computeELA;
+    Saka.openForensics = computeForensic;
 
     /* ── Main Form Button Trigger ────────────────────────── */
 
     if (btnInspect) {
         btnInspect.addEventListener('click', function () {
             if (Saka.state && Saka.state.file) {
-                computeELA({ file: Saka.state.file });
+                computeForensic({ file: Saka.state.file });
             }
         });
     }
@@ -169,8 +219,7 @@
         if (trigger) {
             e.preventDefault();
             const id = trigger.getAttribute('data-forensics-id');
-            if (id) computeELA({ imageId: id });
+            if (id) computeForensic({ imageId: id });
         }
     });
 })();
-

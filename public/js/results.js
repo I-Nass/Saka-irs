@@ -16,6 +16,7 @@
     var CATEGORY_TITLES = {
         duplicates: 'EXACT / NEAR DUPLICATES',
         resemblance: 'VISUAL RESEMBLANCE',
+        specialized: 'SPECIALIZED DOMAIN & GEO-OSINT',
         discovery: 'WEB DISCOVERY / EXTERNAL CORPUS'
     };
 
@@ -79,6 +80,13 @@
 
         if (result.foundVia.length > 1) {
             meta.push('found via: ' + result.foundVia.join(' + '));
+        }
+        if (result.metadata) {
+            if (result.metadata.biome) meta.push('Biome: ' + result.metadata.biome);
+            if (result.metadata.scientificName) meta.push('Taxon: ' + result.metadata.scientificName);
+            if (result.metadata.timezoneOffset && result.metadata.timezoneOffset !== 'Unknown') {
+                meta.push('Timezone: ' + result.metadata.timezoneOffset);
+            }
         }
         card.querySelector('.result-meta').textContent = meta.join(' · ');
 
@@ -145,6 +153,8 @@
                     }
                 } else if (key === 'duplicates') {
                     empty.textContent = 'No matching image found in your local library. Click "Add to Library" on the upload form to index it into your searchable database.';
+                } else if (key === 'specialized') {
+                    empty.textContent = 'No geographic origin or biological taxonomy patterns detected for this query.';
                 } else {
                     empty.textContent = 'Nothing in this category.';
                 }
