@@ -254,6 +254,16 @@ For investigative workflows, multi-engine reverse pivots, and forensic tradecraf
 - **[The-Osint-Toolbox / Image-Research-OSINT](https://github.com/The-Osint-Toolbox/Image-Research-OSINT)** — An extensive living library of image OSINT tools covering reverse search engines, AI geolocation, facial intelligence, and forensic verification.
 - **OPSEC Advantage:** While cloud OSINT tools risk exposing sensitive queries or training external models, Saka-irs processes searches locally first and strictly strips EXIF and GPS coordinates before any external provider dispatch.
 
+### Browser Extension Companion (Harvesting & Ingestion)
+
+While the Pivot panel allows users to manually reverse-search external engines without sharing credentials, saving discovered external matches directly into your local database requires an ingestion seam. 
+
+A companion Web Extension (Manifest V3) solves this problem cleanly without headless scraping overhead:
+- **Direct Database Ingestion**: One-click right-click context menu ("Send to Saka-irs") that transfers images found on Google Lens, Yandex, Pinterest, or news sites straight into your local MongoDB library via `POST /api/images`.
+- **Zero Bot Detection or CAPTCHAs**: Because queries happen in your active browser session, you avoid anti-bot gates, rate-limit bans, and Proof-of-Work challenges completely.
+- **Zero Proxy or VPN Requirements**: Operates over your legitimate human residential connection without paying for rotating proxy pools.
+- **Universal Capture**: Captures full-resolution images from any website's DOM cache rather than relying on brittle site-specific scrapers.
+
 ## Documentation
 
 Full architecture, flows, data models, security policy, and legal boundaries:
@@ -268,6 +278,8 @@ Saka-irs distinguishes *publicly searchable* from *permitted to automatically ac
 <div align="center">
 
 *Evidence, not certainty.*
+
+Saka-irs · 2026
 
 </div>
 
